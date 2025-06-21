@@ -1,11 +1,11 @@
 export interface Booking {
   id: string;
-  guestId: string;
-  startDate: string;
-  endDate: string;
-  numNights: number;
-  totalPrice: number;
-  numGuests: number;
+  guest_id: string;
+  start_date: string;
+  end_date: string;
+  num_nights: number;
+  total_price: number;
+  num_guests: number;
   status: string;
   created_at: string;
   cabins: {

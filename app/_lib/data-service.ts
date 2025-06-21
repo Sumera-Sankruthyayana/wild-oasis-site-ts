@@ -83,10 +83,10 @@ export async function getBookings(guestId: string) {
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
     .select(
-      "id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image)"
+      "id, created_at, start_date, end_date, num_nights, num_guests, total_price, guest_id, status, cabin_id, cabins(name, image)"
     )
-    .eq("guestId", guestId)
-    .order("startDate");
+    .eq("guest_id", guestId)
+    .order("start_date");
 
   if (error) {
     console.error(error);
@@ -117,8 +117,8 @@ export async function getBookedDatesByCabinId(cabinId: string) {
   const bookedDates = data
     .map((booking: Booking) => {
       return eachDayOfInterval({
-        start: new Date(booking.startDate),
-        end: new Date(booking.endDate),
+        start: new Date(booking.start_date),
+        end: new Date(booking.end_date),
       });
     })
     .flat();

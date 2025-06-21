@@ -7,6 +7,7 @@ import TextExpander from "@/app/_components/TextExpander";
 import Reservation from "@/app/_components/Reservation";
 import Spinner from "@/app/_components/Spinner";
 import { Suspense } from "react";
+
 export async function generateStaticParams() {
   const cabins = await getCabins();
   return cabins.map((cabin) => ({

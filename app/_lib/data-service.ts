@@ -66,7 +66,9 @@ export async function getGuest(email: string) {
 export async function getBooking(id: string) {
   const { data, error } = await supabase
     .from("bookings")
-    .select("*")
+    .select(
+      "id, created_at, observation, start_date, end_date, num_nights, num_guests, total_price, guest_id, status, cabin_id, cabins(name, image, max_capacity)"
+    )
     .eq("id", id)
     .single();
 

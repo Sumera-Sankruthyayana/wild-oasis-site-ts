@@ -8,8 +8,10 @@ export interface Booking {
   num_guests: number;
   status: string;
   created_at: string;
+  observation: string;
   cabins: {
     name: string;
     image: string;
+    max_capacity: number;
   };
 }

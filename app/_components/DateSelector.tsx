@@ -1,39 +1,41 @@
 "use client";
-import { isWithinInterval } from "date-fns";
+import { differenceInDays, isPast, isSameDay, isWithinInterval } from "date-fns";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import "react-day-picker/style.css";
 import { Cabin } from "@/app/_types/Cabin";
 import { useReservation } from "./ReservationContext";
-function isAlreadyBooked(range: any, datesArr: any) {
+import { DateRange } from "react-day-picker";
+
+function isAlreadyBooked(range: DateRange | undefined, datesArr: Date[]) {
   return (
-    range.from &&
-    range.to &&
-    datesArr.some((date: any) =>
-      isWithinInterval(date, { start: range.from, end: range.to })
+    range?.from &&
+    range?.to &&
+    datesArr.some((date: Date) =>
+      isWithinInterval(date, { start: range.from!, end: range.to! })
     )
   );
 }
 
 function DateSelector({
-  settings,
   bookedDates,
   cabin,
 }: {
-  settings: any;
-  bookedDates: any;
+  bookedDates: Date[];
   cabin: Cabin;
 }) {
   // CHANGE
-  const regularPrice = 23;
-  const discount = 23;
-  const numNights = 23;
-  const cabinPrice = 23;
+
+  const {regular_price, discount} = cabin;
 
   // SETTINGS
   const minBookingLength = 1;
   const maxBookingLength = 23;
   const defaultClassNames = getDefaultClassNames();
   const { range, setRange, resetRange } = useReservation();
+  //const displayRange = isAlreadyBooked(range, bookedDates) ? range : {from: undefined, to: undefined};
+  const numNights = range?.from && range?.to ? differenceInDays(range.to, range.from) : 0;
+  const cabinPrice = numNights * (regular_price - discount);
+
 
   return (
     <div className="flex flex-col justify-between">
@@ -52,10 +54,10 @@ function DateSelector({
         min={minBookingLength + 1}
         max={maxBookingLength}
         startMonth={new Date()}
-        hidden={{ before: new Date() }}
         endMonth={new Date(new Date().getFullYear() + 5, 0)}
         captionLayout="dropdown"
         numberOfMonths={1}
+        disabled={(curDate) => isPast(curDate) || bookedDates.some((date) => isSameDay(date, curDate))}
       />
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
@@ -63,13 +65,13 @@ function DateSelector({
           <p className="flex gap-2 items-baseline">
             {discount > 0 ? (
               <>
-                <span className="text-2xl">${regularPrice - discount}</span>
+                <span className="text-2xl">${regular_price - discount}</span>
                 <span className="line-through font-semibold text-primary-700">
-                  ${regularPrice}
+                  ${regular_price}
                 </span>
               </>
             ) : (
-              <span className="text-2xl">${regularPrice}</span>
+              <span className="text-2xl">${regular_price}</span>
             )}
             <span className="">/night</span>
           </p>

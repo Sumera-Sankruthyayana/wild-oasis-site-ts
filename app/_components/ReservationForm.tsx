@@ -2,6 +2,10 @@
 import { Cabin } from "@/app/_types/Cabin";
 import { useReservation } from "./ReservationContext";
 import { Session } from "next-auth";
+import { differenceInDays } from "date-fns";
+import { createReservation } from "@/app/_lib/actions";
+import { ReservationData } from "@/app/_types/ReservationData";
+import CreateReservationButton from "./CreateReservationButton";
 function ReservationForm({
   cabin,
   session,
@@ -10,8 +14,19 @@ function ReservationForm({
   session: Session;
 }) {
   // CHANGE
-  const { max_capacity } = cabin;
-  const { range } = useReservation();
+  const { max_capacity, regular_price, discount, id } = cabin;
+  const { range, resetRange } = useReservation();
+  const numNights = range?.from && range?.to ? differenceInDays(range.to, range.from) : 0;
+  const cabinPrice = numNights * (regular_price - discount);
+  const reservationData: ReservationData = {
+    cabin_id: id,
+    start_date: range?.from,
+    end_date: range?.to,
+    cabin_price: cabinPrice,
+    num_nights: numNights,
+  }
+  const createReservationWithData = createReservation.bind(null, reservationData);
+
   return (
     <div className="scale-[1.01]">
       <div className="bg-primary-800 text-primary-300 px-16 py-2 flex justify-between items-center">
@@ -28,14 +43,15 @@ function ReservationForm({
           <p>{session.user?.name}</p>
         </div>
       </div>
-      <p>{range?.from?.toLocaleDateString()}</p>
-      <p>{range?.to?.toLocaleDateString()}</p>
-      <form className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col">
+      <form action={(formData: FormData)=>{
+        createReservationWithData(formData);
+        resetRange();
+      }} className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col">
         <div className="space-y-2">
           <label htmlFor="numGuests">How many guests?</label>
           <select
-            name="numGuests"
-            id="numGuests"
+            name="num_guests"
+            id="num_guests"
             className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
             required
           >
@@ -55,19 +71,19 @@ function ReservationForm({
             Anything we should know about your stay?
           </label>
           <textarea
-            name="observations"
-            id="observations"
+            name="observation"
+            id="observation"
             className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
             placeholder="Any pets, allergies, special requirements, etc.?"
           />
         </div>
 
         <div className="flex justify-end items-center gap-6">
-          <p className="text-primary-300 text-base">Start by selecting dates</p>
-
-          <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-            Reserve now
-          </button>
+          {range?.from && range?.to ? (
+            <CreateReservationButton />
+          ) : (
+            <p className="text-primary-300 text-base">Start by selecting dates</p>
+          )}
         </div>
       </form>
     </div>
